@@ -427,7 +427,7 @@ export function runAggregate(collection, pipeline) {
 }
 
 export function getUser(userId) {
-  return callbackToPromise(MeteorObservable.call('findOne', 'users', {_id: userId}));
+  return callbackToPromise(MeteorObservable.call('findOne', 'users', {_id: userId}, {fields: {services: 0}}));
 }
 
 export function getTenantById(tenantId) {
@@ -448,6 +448,9 @@ export function update(collectionName, query, update) {
 
 export function findOne(collectionName, query, options?) {
   return callbackToPromise(MeteorObservable.call('findOne', collectionName, query, options));
+}
+export function find(collectionName, query, options?) {
+  return callbackToPromise(MeteorObservable.call('find', collectionName, query, options));
 }
 
 export function getSystemLog() {
@@ -521,29 +524,29 @@ export function parseUrlParams(params) {
 // async functions
 export async function isDeveloper(userId, tenantId) {
   const user:any = await getUser(userId);
-  let tenant = await getTenantById(tenantId);
-
   if ('tenants' in user) {
     const tenantIndex = user.tenants.findIndex(tenant => {
       if (tenant._id == tenantId) {
         return true;
       }
     });
-    let mapResult = await Promise.all(user.tenants[tenantIndex].groups.map(async(groupId) => {
-      if (groupId) {
-        let group:any = await callbackToPromise(MeteorObservable.call('findOne', 'userGroups', {_id: groupId}))
-        if (group && group.name == 'Developer') {
+    if (tenantIndex > -1) {
+      let mapResult = await Promise.all(user.tenants[tenantIndex].groups.map(async(groupId) => {
+        if (groupId) {
+          let group:any = await callbackToPromise(MeteorObservable.call('findOne', 'userGroups', {_id: groupId}))
+          if (group && group.name == 'Developer') {
+            return true;
+          }
+        }
+      }));
+      let index = mapResult.findIndex(res => {
+        if (res == true) {
           return true;
         }
-      }
-    }));
-    let index = mapResult.findIndex(res => {
-      if (res == true) {
+      });
+      if (index > -1) {
         return true;
       }
-    });
-    if (index > -1) {
-      return true;
     }
   }
   return false;
@@ -835,7 +838,7 @@ function generateTableBody(contents) {
   });
   reportTitle.splice(0, 1, { text: title + date, style: 'header', colSpan: reportTitle.length, alignment: 'left', border: [false, false, false, false] });
   body.push(reportTitle, columnTitles);
-  
+
   results.forEach(element => {
     let row = [];
     rowSpecificInfo.forEach(rowInfo => {
@@ -850,7 +853,7 @@ function generateTableBody(contents) {
             text = "";
           }
         }
-        
+
         row.push({ text: text, alignment: rowInfo.alignment, fontSize: 9, border: [false, false, false, false] })
       }
     });
@@ -859,7 +862,7 @@ function generateTableBody(contents) {
 
   if (totals) {
     let rowTotal = [];
-      rowSpecificInfo.forEach(rowInfo => {
+    rowSpecificInfo.forEach(rowInfo => {
       if (rowInfo.total) {
         rowTotal.push({ text: totals[rowInfo.total].toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), fontSize: 9, bold: true, alignment: rowInfo.alignment, margin: [0, 0, 0, 0], border: [false, true, false, true] })
       } else {
@@ -880,7 +883,7 @@ function getTables(table) {
   // columnHeaders = Object.keys(table['row'][0]);
 
   columnHeaders = ['Customer Part No.', 'Global Part No.', 'Descripton', 'Price']
-  
+
   columnHeaders.map((column, index) => {
     if (index !== 3) {
       colArr.push({ text: column, style: 'tableHeader', alignment: 'left' })
@@ -888,7 +891,7 @@ function getTables(table) {
       colArr.push({ text: column, style: 'tableHeader', alignment: 'right' })
     }
   })
-  
+
   let tableBody = table.row;
   tableBody.map((row) => {
     let eachRowArr = [];
@@ -1315,14 +1318,14 @@ export function projectedFutureSales(dateRange) {
         }
       }
     },
-     {
-     "$group": {
+    {
+      "$group": {
         "_id": "000",
         "total": {
-           "$sum": "$total"
+          "$sum": "$total"
         }
-     }
-  },
+      }
+    },
   ];
   return runAggregate('customerInvoices', pipeline);
 }

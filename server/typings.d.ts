@@ -173,3 +173,14 @@ declare module "meteor/reactive-dict" {
 }
 // end: Sep 21, 2017
 
+
+// start: Oct 26, 2017
+declare const SSR;
+declare const MarkerClusterer;
+// end: Oct 26, 2017
+
+declare const TimeSync;
+declare const UserStatus;
+
+// May 22, 2018
+declare const MongoInternals;
