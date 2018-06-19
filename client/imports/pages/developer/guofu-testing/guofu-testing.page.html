@@ -1,0 +1,43 @@
+<page-header></page-header>
+<section class="box">
+  <form [formGroup]="form" novalidate (submit)="submit(form.value, form.valid)">
+    <div formGroupName="address">
+      <label>Address</label>
+      <mat-input-container>
+        <input matInput formControlName="street" type="text" placeholder="street" name="street" value=""
+               (blur)="onBlur($event.target.name)">
+      </mat-input-container>
+      <small
+          [hidden]="form.controls.address.controls.street.valid || (form.controls.address.controls.street.pristine && !submitted)">
+        street required
+      </small>
+      <mat-input-container>
+        <input matInput formControlName="postcode" type="text" placeholder="postcode" value="">
+      </mat-input-container>
+      <small
+          [hidden]="form.controls.address.controls.postcode.valid || (form.controls.address.controls.postcode.pristine && !submitted)">
+        postcode required
+      </small>
+    </div>
+    <!--<div formGroupName="address">-->
+    <!--<label>Postcode</label>-->
+    <!--<mat-input-container>-->
+    <!--<input matInput formControlName="postcode" type="text" placeholder="postcode" value="">-->
+    <!--</div>-->
+    <!--</mat-input-container>-->
+
+    <button type="submit">Submit</button>
+    <!--<system-lookup [lookupName]="'manageCategoryProducts'" [documentId]="'xCI4laEHJWumRAADq'" [(config)]="config" [(data)]="data"></system-lookup>-->
+    <!--<system-lookup [lookupName]="'contractPricing'" [(data)]="data"></system-lookup>-->
+
+  </form>
+
+
+  <div class="p-10">
+    <button mat-raised-button (click)="updateCustomerContractsProductsPrice()">Update Customer Contracts Products'
+      Price
+    </button>
+  </div>
+
+</section>
+

@@ -1,0 +1,142 @@
+.searchBarInput {
+  width: 50%;
+}
+
+.datatable-body-cell-label {
+  display: none;
+}
+
+.example-header {
+  padding: 10px;
+}
+
+mat-header-cell {
+  margin-right: 10px;
+}
+
+mat-cell {
+  margin-right: 10px;
+}
+mat-row:hover {
+  background: rgba(228, 232, 237, 0.5);
+}
+.numberTmplCell {
+  background-color: #f3f3f3;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #cbd4df;
+  border-color: transparent;
+  padding: 3px 10px;
+  &:hover {
+    background-color: #dadada;
+  }
+}
+
+.numberTmplHeader {
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #cbd4df;
+  border-color: transparent;
+  padding: 3px 10px;
+  &:hover {
+    background-color: #abbacc;
+  }
+}
+
+.numberTmplCellNoHover {
+  background-color: #f3f3f3;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #cbd4df;
+  border-color: transparent;
+  padding: 3px 10px;
+}
+
+.highlighted {
+  background: #cbd4df;
+}
+
+.cellHighlighted {
+  background: #3f51b5;
+  color: white;
+}
+
+.cellHighlightedRed {
+  background: red;
+  color: white;
+}
+
+
+// chip
+
+.filter-name {
+  padding-right: 30px;
+  white-space: nowrap;
+}
+
+.filter-icon {
+  position: relative;
+  right: 20px;
+  top: -11px;
+}
+
+.filter-remove {
+  position: absolute;
+}
+
+.expansion-panel__content[_ngcontent-c24] {
+  margin-left: 0 !important;
+}
+
+.loadingData {
+  display: none;
+}
+.newHighlight {
+  background: green;
+  color: white;
+}
+
+.isChanged {
+  background-color: yellowgreen;
+}
+
+.mobile-label {
+  display: none !important;
+}
+
+@media(max-width: 600px) {
+  .mobile-label {
+    display: inline-block !important;
+    font-weight: bold;
+  }
+
+  mat-header-row {
+    display: none !important;
+  }
+
+  mat-row {
+    flex-direction: column;
+    align-items: start;
+    padding: 8px 24px;
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.greenBackground {
+  background: #77dd77;
+}
+
+.yellowBackground {
+  background: #fdfd96;
+}
+
+.redBackground {
+  background: #ff6961;
+
+}
+
+.mat-header-cell {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+}

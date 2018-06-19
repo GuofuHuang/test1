@@ -1,0 +1,48 @@
+<page-header [(pageHeaderInput)]="pageHeader"></page-header>
+<div class="subHeader">
+  <h2><mat-icon [routerLink]="['/customers/quotes']">chevron_left</mat-icon> Customer Quote Review</h2>
+</div>
+<mat-card *ngIf="isDataReady">
+    <div fxLayout="row" fxLayoutAlign="space-between start">
+      <div fxFlex="50">
+        <h2>Quote By: {{quote.user}}</h2>
+        <h3>Customer: {{quote.customer}}</h3>
+        <h3>Product Line: {{quote.category}}</h3>
+        <h3>Status: {{capitalStatus}}</h3>
+      </div>
+      <div style="text-align: right;" fxFlex="50">
+        <h3>Created At: {{quote.createdAt | date:'fullDate'}} {{quote.createdAt | date:'h:mm a'}}</h3>
+        <h3 *ngIf="capitalStatus !== 'Pending'">{{capitalStatus}} At: {{quote.updatedAt | date:'fullDate'}} {{quote.updatedAt | date:'h:mm a'}}</h3>
+      </div>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="space-between center" class="ph-24">
+      <div fxFlex="100" class="select-containter">
+        <!--<div>SALES PERSON NOTES</div>-->
+        <mat-form-field class="full-width">
+          <textarea matInput placeholder="SALES PERSON NOTES" readonly value={{quote.notes}}></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    <br>
+    <div fxLayout="row" fxLayoutAlign="space-between center" class="ph-24">
+      <div fxFlex="100" class="select-containter">
+        <!--<label>ADMIN NOTES</label>-->
+        <mat-form-field class="full-width">
+          <textarea matInput placeholder="Admin Notes" (blur)="adminNotes($event)" [(ngModel)]="quote.adminNotes" [attr.readonly]="quote.status === 'pending' ? null : 'readonly'"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    <br>
+    <span *ngIf="manageQuote && quote.status === 'pending'">
+      <button mat-raised-button color="primary" type="button" (click)="completeQuote('rejected')">Reject Quote</button>
+      <button mat-raised-button color="primary" type="button" (click)="completeQuote('approved')">Approve Quote</button>
+    </span>
+    <div style="position: relative;">
+      <div class="disable-whole-div__cover" [hidden]="quote.status === 'pending'"></div>
+      <system-lookup [lookupName]="'customerQuoteReview'" (tableRows)='getRows($event)' [isModal]="false" (onSelected)="select($event)" [documentId]="documentId" [data]="data" [(filterConditions)]="filterConditions"></system-lookup>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="!isDataReady">
+  <mat-spinner class="app-spinner"></mat-spinner>
+</mat-card>

@@ -1,0 +1,547 @@
+<div class="example-container mat-elevation-z8" style="background: white">
+  <form fxLayout="row" class="pl-10 pt-10" *ngIf="dataTableOptions.searchable">
+    <div *ngIf="!isWidget" fxFlex="40" fxFlex.md="65" fxFlex.sm="75" fxFlex.xs="85">
+      <mat-form-field class="full-width">
+        <input matInput name="searchInput" #searchInput placeholder="Search" [(ngModel)]="keywords" >
+      </mat-form-field>
+    </div>
+
+    <div fxFlex="110px" fxLayout="row">
+      <div fxFlex="10px"></div>
+      <mat-form-field style="width: 100px">
+        <mat-select name="selectColumn" [(ngModel)]="selectedColumn" placeholder="Columns">
+          <mat-option *ngFor="let column of columns" [value]="column">
+            {{column.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div fxFlex="none" *ngIf="!isWidget" fxLayoutAlign="start center">
+      <button mat-icon-button (click)="search(keywords)">
+        <i class="material-icons">search</i>
+      </button>
+    </div>
+    <div fxFlex="none" *ngIf="!isWidget && showPdf" fxLayoutAlign="start center">
+      <button mat-raised-button type="button" (click)="PDF()">PDF</button>
+    </div>
+    <!-- <div *ngIf="!isWidget && showSummary" style="padding-top: 10px;">
+      <button mat-raised-button type="button" (click)="summary()">Summary</button>
+    </div> -->
+
+    <div fxFlex="10px"></div>
+    <div fxFlex *ngIf="loading" fxLayoutAlign="start center">
+      <mat-spinner [diameter]="'30'"></mat-spinner>
+    </div>
+  </form>
+
+  <div class="pl-10">
+    <mat-chip-list>
+      <mat-chip *ngFor="let filter of modalFilters"
+               selected="true"
+               fxLayout="row wrap" class="filter-tag">
+        <div fxFlex="" class="filter-name cursor-pointer">
+          <span>{{filter.label}}</span>
+        </div>
+        <div class="float-right filter-icon cursor-pointer" fxFlex="">
+          <div fxFlex="auto" class="filter-remove" (click)="removeModalFilter($event, filter)">
+            <mat-icon>clear</mat-icon>
+          </div>
+        </div>
+      </mat-chip>
+    </mat-chip-list>
+  </div>
+
+  <!--<mat-table #table [dataSource]="dataSource" matSort [matSortActive]="username" [matSortStart]="'desc'" (matSortChange)="onSort($event)" >-->
+  <mat-table #table *ngIf="!needRefresh" [dataSource]="dataSource" matSort [(matSortActive)]="sortActive" [(matSortDirection)]="sortDirection" (matSortChange)="onSort($event)">
+
+    <!-- ID Column -->
+    <div *ngFor="let column of columns">
+      <ng-container matColumnDef="{{column.prop}}" [ngSwitch]="getTemplateName(column)">
+        <div *ngSwitchDefault>
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto"> {{column.name}}</mat-header-cell>
+          <mat-cell *matCellDef="let row" style="cursor: pointer" routerLink="{{row._id}}" [fxFlex]="column.width ? column.width : auto">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop]}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'noShowTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'dateTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}}</mat-header-cell>
+          <mat-cell *matCellDef="let row" style="cursor: pointer" routerLink="{{row._id}}">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop] | date: 'MMM d, y, hh:mm a'}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'dateTmpl_dateview'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}}</mat-header-cell>
+          <mat-cell *matCellDef="let row" (click)="onReturn(row, column)" style="cursor: pointer" routerLink="{{row._id}}">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop] | date: 'mediumDate'}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'noTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto"> <div>{{column.name}}</div> </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop]}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'logTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : 20"> <div>{{column.name}} </div> </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : 20">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop]}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'priceLevelTmpl'">
+          <mat-header-cell *matHeaderCellDef [fxFlex]="column.width ? column.width : auto" >
+            <div mat-sort-header>
+              <span>
+                {{column.name}}
+              </span>
+            </div>
+            <div (click)="setPriceLevel($event, column)" style="text-align: center" class="cursor-pointer numberTmplHeader">
+              <span>Set</span>
+            </div>
+          </mat-header-cell>
+          <mat-cell
+              *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop) && row[systemLookup.dataTable.options.controlFieldName],
+              'newHighlight': (row['newHighlightField'] == column.prop && row[systemLookup.dataTable.options.controlFieldName])
+              }"
+              (click)="onChange($event, row, column, i)"
+          >
+
+            <div *ngIf="row[column.prop] >= 0">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+
+        <div *ngSwitchCase="'priceLevelTmpl_contractPricing'">
+          <mat-header-cell *matHeaderCellDef [fxFlex]="column.width ? column.width : auto" >
+            <div mat-sort-header>
+              <span>
+                {{column.name}}
+              </span>
+            </div>
+            <div (click)="setPriceLevel($event, column)" style="text-align: center" class="cursor-pointer numberTmplHeader">
+              <span>Set</span>
+            </div>
+          </mat-header-cell>
+          <mat-cell
+              *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop) && row[systemLookup.dataTable.options.controlFieldName],
+              'newHighlight': (row['newHighlightField'] == column.prop && row[systemLookup.dataTable.options.controlFieldName])
+              }"
+              (click)="onContractProductPriceChange($event, row, column, i)"
+          >
+            <div *ngIf="row[column.prop] >= 0">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+
+        <!-- Joe Quote Cell Template -->
+        <div *ngSwitchCase="'quotePriceLevelTmpl'">
+          <mat-header-cell *matHeaderCellDef matSortDisabled [fxFlex]="column.width ? column.width : auto" class="numberTmplHeader" [ngClass]="{'cellHighlighted': selectedLevelHeader == column.prop}">
+            <div (click)="selectColumn(column.prop)">
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" class="cursor-default" [ngClass]="{'cellHighlighted': (row['highlightFieldName'] == column.prop), 'numberTmplCell': !mobile, 'numberTmplCellNoHover': mobile}">
+            <div *ngIf="row[column.prop] >= 0" (click)="quoteOnChange({target: {type: 'number', column: column, value: row[column.prop].toFixed(2)}}, row, column, i, 'price')">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+            <div *ngIf="row[column.prop] < 0">
+              <!-- {{row[column.prop] | number: '1.2-2'}} -->
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'overridePriceTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto">
+            <div class="mobile-label">
+              <span >{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+            <div *ngIf="!Device.isPhone()" style="padding: 5px;" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop),
+              'newHighlight': (row['newHighlightField'] == column.prop)
+              }">
+              <input type="tel" [disabled]="!row[systemLookup.dataTable.options.checkboxFieldName]" matInput type="number" ngModel="{{row[column.prop]| number: '1.2-2'}}" (change)="overrideChange($event, row, column, i)" style="text-align: left;"/>
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'overridePriceTmpl_contractPricing'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto">
+            <div class="mobile-label">
+              <span >{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+            <div *ngIf="!Device.isPhone()" style="padding: 5px;" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop),
+              'newHighlight': (row['newHighlightField'] == column.prop)
+              }">
+              <input [disabled]="!row[systemLookup.dataTable.options.checkboxFieldName]" matInput type="number" ngModel="{{row[column.prop]| number: '1.2-2'}}" (change)="onContractProductPriceChange($event, row, column, i)" style="text-align: left;"/>
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'overridePriceTmplQuote'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" [ngClass]="{
+          'cellHighlighted': (row['highlightFieldName'] == column.prop),
+          'numberTmplCell': !mobile,
+          'numberTmplCellNoHover':mobile}">
+            <div>
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.2-2'}}" (blur)="quoteOnChange($event, row, column, i, 'override')" style="text-align: left;"/>
+            </div>
+          </mat-cell>
+        </div>
+        <!-- <div *ngSwitchCase="'overridePriceTmplQuote'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default"
+          [ngClass]="{
+            'cellHighlighted': row.selectedLevelPrice == row[column.prop].toFixed(2),
+            'numberTmplCell': !mobile, 'numberTmplCellNoHover':mobile}">
+            <div >
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.2-2'}}" (click)="$event.target.select()" (change)="quoteOnChange($event, row, 'override')"
+                     style="text-align: left;" />
+            </div>
+          </mat-cell>
+        </div> -->
+        <div *ngSwitchCase="'quoteReviewLevelTmpl'">
+          <mat-header-cell *matHeaderCellDef matSortDisabled [fxFlex]="column.width ? column.width : auto" class="numberTmplHeader">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default" [ngClass]="{'cellHighlightedRed': row.selectedLevelPrice == row[column.prop].toFixed(2)}">
+            <div *ngIf="row[column.prop] >= 0" (click)="quoteReviewLevelChange({target: {type: 'number', value: row[column.prop].toFixed(2)}}, row, 'price')">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+            <div *ngIf="row[column.prop] < 0">
+              <!-- {{row[column.prop] | number: '1.2-2'}} -->
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'overrideReviewPriceTmpl'">
+          <mat-header-cell *matHeaderCellDef matSortDisabled [fxFlex]="column.width ? column.width : auto" class="numberTmplHeader">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cellHighlighted cursor-default" [ngClass]="{'cellHighlightedRed': row.selectedLevelPrice == row[column.prop].toFixed(2)}">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.2-2'}}" (blur)="quoteReviewLevelChange($event, row, 'override')"
+                     style="text-align: left;" />
+            </div>
+          </mat-cell>
+        </div>
+        <!-- Joe Quote Cell Template End -->
+        <div *ngSwitchCase="'highlightNumberTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto" class="numberTmplHeader">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'numberTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <div *ngIf="row[column.prop] != ''">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'dollarTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              ${{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'percentTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.0-0'}}" (change)="changeGrossProfit($event, row)" style="text-align: left;"/>
+              <!-- {{row[column.prop] | number: '1.0-0'}}% -->
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'nonEditPercentTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}%
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'quantityTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.0'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'previousTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell
+              *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop) && row[systemLookup.dataTable.options.controlFieldName],
+              'newHighlight': (row['newHighlightField'] == column.prop && row[systemLookup.dataTable.options.controlFieldName])
+              }"
+              (click)="onChange($event, row, column, i)"
+          >
+
+            <div *ngIf="row[column.prop] >= 0">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'previousTmpl_contractPricing'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell
+              *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto" class="numberTmplCell cursor-default" [ngClass]="{
+              'cellHighlighted': (row['highlightFieldName'] == column.prop) && row[systemLookup.dataTable.options.controlFieldName],
+              'newHighlight': (row['newHighlightField'] == column.prop && row[systemLookup.dataTable.options.controlFieldName])
+              }"
+              (click)="onContractProductPriceChange($event, row, column, i)"
+          >
+
+            <div *ngIf="row[column.prop] >= 0">
+              <span class="mobile-label">{{column.name}}:</span>
+              {{row[column.prop] | number: '1.2-2'}}
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'priceTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.2-2'}}" (change)="onChange($event, row, column, i)" style="text-align: left;" />
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'updatePriceTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">
+            <div>
+              {{column.name}}
+            </div>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index" [fxFlex]="column.width ? column.width : auto">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              <input type="tel" matInput type="number" ngModel="{{row[column.prop] | number: '1.2-2'}}" (change)="onChange($event, row, column, i)" style="text-align: left;" />
+            </div>
+          </mat-cell>
+        </div>
+        <!--<div *ngSwitchCase="'overideNumberTmpl'">-->
+        <!--<mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto">-->
+        <!--<div>-->
+        <!--{{column.name}}-->
+        <!--</div>-->
+        <!--</mat-header-cell>-->
+        <!--<mat-cell *matCellDef="let row"  [fxFlex]="column.width ? column.width : auto" class="numberTmplCell">-->
+        <!--<div>-->
+        <!--<input type="tel" matInput (change)="onChange($event, row)" style="text-align: left;" />-->
+        <!--</div>-->
+        <!--</mat-cell>-->
+        <!--</div>-->
+        <div *ngSwitchCase="'actionsTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <div [hidden]="hideDelete">
+              <span class="mobile-label">{{column.name}}:</span>
+              <a (click)="onClick(row, null, {name: 'disable', type: 'update'})" style="cursor: pointer">
+                <i class="material-icons">delete</i>
+              </a>
+            </div>
+
+            <div [hidden]="!hideDelete">
+              <a (click)="onClick(row, null, {name: 'enable', type: 'update'})" style="cursor: pointer">
+                <i class="material-icons">settings_backup_restore</i>
+              </a>
+              <a (click)="onClick(row, null, {name: 'remove', type: 'remove'})" style="cursor: pointer">
+                <i class="material-icons">delete_forever</i>
+              </a>
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'actionsPullTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <div>
+              <span class="mobile-label">{{column.name}}:</span>
+              <a (click)="onClick(row, null, {name: 'remove', type: 'update'})" style="cursor: pointer">
+                <i class="material-icons">delete</i>
+              </a>
+            </div>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'enableTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header fxFlex="5"> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row" fxFlex="5">
+            <span class="mobile-label">{{column.name}}:</span>
+            <mat-checkbox color="primary" (change)="onCheckboxChange($event, row, column)" [(ngModel)]="row[column.prop]"></mat-checkbox>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'enableTmpl_contractPricing'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header fxFlex="5"> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row" fxFlex="5">
+            <span class="mobile-label">{{column.name}}:</span>
+            <mat-checkbox color="primary" (change)="onCheckboxChange_contractPricing($event, row, column)" [(ngModel)]="row[column.prop]"></mat-checkbox>
+          </mat-cell>
+        </div>
+
+        <div *ngSwitchCase="'lookupTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row" (click)="onClick(row, null, null)" style="min-height: 20px; cursor: pointer;">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row.groups}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'addTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <span class="mobile-label">{{column.name}}:</span>
+            <mat-checkbox (change)="onCheckboxChange($event, row, column)" [checked]="row[column.prop]"></mat-checkbox>
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'returnTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto"> {{column.name}} </mat-header-cell>
+          <mat-cell *matCellDef="let row" (click)="onReturn(row, column)" style="cursor: pointer" [fxFlex]="column.width ? column.width : auto">
+            <span class="mobile-label">{{column.name}}:</span>
+            {{row[column.prop]}}
+          </mat-cell>
+        </div>
+        <div *ngSwitchCase="'statusDropboxTmpl'">
+          <mat-header-cell *matHeaderCellDef mat-sort-header [fxFlex]="column.width ? column.width : auto"> {{column.name}}</mat-header-cell>
+          <mat-cell *matCellDef="let row" (click)="onReturn(row, column)" [fxFlex]="column.width ? column.width : auto">
+            <span class="mobile-label">{{column.name}}:</span>
+            <mat-select style="width: 150px" (change)="onStatusChange($event, row)" [ngModel]="row['status']" >
+              <mat-option *ngFor="let status of permissionStatus" [value]="status.value">
+                {{status.label}}
+              </mat-option>
+            </mat-select>
+            <!--{{row[column.prop]}}-->
+          </mat-cell>
+        </div>
+      </ng-container>
+    </div>
+    <!--style="position: fixed; width: 100%; top: 100px; background: white"-->
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"
+            [ngClass]="{
+      loadingData: loading,
+      greenBackground: row.backgroundColor == 'green',
+      yellowBackground: row.backgroundColor == 'yellow',
+      redBackground: row.backgroundColor == 'red'
+      }" attr.data-test="{{systemLookup.name}}"
+            (click)="onMobileClick(row)"
+    ></mat-row>
+  </mat-table>
+  <div *ngIf="!loading && !isWidget">
+    <mat-paginator (page)="onPage($event)" #paginator
+                  [length]="count"
+                  [pageIndex]="pageIndex"
+                  [pageSize]="pageSize"
+                  [pageSizeOptions]="[5, 10, 25, 100, 250]">
+    </mat-paginator>
+  </div>
+</div>
+<div class="p-10" style="text-align: left"  *ngIf="dataTableOptions.buttonsShown">
+  <button mat-raised-button color="primary" [(disabled)]="!state.isSaveButtonEnabled"
+          *ngIf="(dataTableOptions.isSaveButtonShown == true) || (dataTableOptions.isSaveButtonShown == false)? dataTableOptions.isSaveButtonShown: false" (click)="runActions()">
+    Save</button>
+  <button mat-raised-button color="accent" (click)="cancelUpdate()">Cancel</button>
+  <button mat-raised-button color="warn" (click)="checkAll()">Check All</button>
+  <button mat-raised-button color="warn" (click)="unCheckAll()">Uncheck All</button>
+</div>
+
+<!--<mat-card *ngIf="loading || !showTable">-->
+<!--<mat-spinner class="app-spinner"></mat-spinner>-->
+<!--</mat-card>-->
+<simple-notifications [options]="options"></simple-notifications>
+
+
+<!--highlighted: systemLookup.name == 'manageCategoryProducts'-->
+<!--&& (row.price == row.level1.toFixed(2) ||-->
+<!--row.price == row.level2.toFixed(2) ||-->
+<!--row.price == row.level3.toFixed(2) ||-->
+<!--row.price == row.level4.toFixed(2))-->
+<!--&& row.price != '0.00'-->

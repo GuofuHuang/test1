@@ -1,0 +1,49 @@
+<div fxLayout="row wrap">
+  <div fxFlex="200px">
+    <mat-form-field>
+      <mat-select *ngIf="state.savedFilters.length >= 0" placeholder="Select filter" [(ngModel)]="state.selectedSavedFilter" floatPlaceholder="never" (change)="onSelectFilter()" style="width: 100%">
+        <mat-option *ngFor="let filter of state.savedFilters" [value]="filter">
+          {{ filter.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div fxFlexOffset="30px" fxFlex="none" fxLayoutAlign="start center">
+    <button mat-raised-button (click)="addNewFilter()">Add New Filter</button>
+  </div>
+</div>
+
+<mat-chip-list>
+  <mat-chip *ngFor="let filter of modalFilters"
+           selected="true"
+           fxLayout="row wrap" class="filter-tag">
+    <div fxFlex="" class="filter-name cursor-pointer" (click)="showFilterDetail(filter)">
+      <span>{{filter.name}}</span>
+    </div>
+    <div class="float-right filter-icon cursor-pointer" fxFlex="">
+      <div fxFlex="none" class="filter-remove" (click)="removeAddedFilter($event, filter)">
+        <mat-icon>clear</mat-icon>
+      </div>
+    </div>
+  </mat-chip>
+</mat-chip-list>
+
+<mat-chip-list *ngIf="state.addedFilters.length > 0">
+  <mat-chip *ngFor="let filter of state.addedFilters"
+           color="accent"
+           selected="true"
+           fxLayout="row wrap" class="filter-tag">
+    <div fxFlex="" class="filter-name cursor-pointer" (click)="showFilterDetail(filter)">
+      <span>{{filter.name}}</span>
+    </div>
+    <div class="float-right filter-icon cursor-pointer" fxFlex="">
+      <div fxFlex="none" class="filter-remove" (click)="removeAddedFilter(filter)">
+        <mat-icon>clear</mat-icon>
+      </div>
+    </div>
+  </mat-chip>
+</mat-chip-list>
+
+<div [hidden]="state.isDetailHidden">
+  <filterDetail-component [lookupName]="lookupName" [savedFilters]="state.savedFilters" [filter]="state.selectedFilter" [columns]="state.columns" (stateOutput)="reducers($event)"></filterDetail-component>
+</div>

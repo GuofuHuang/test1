@@ -1,0 +1,221 @@
+<page-header [(pageHeaderInput)]="pageHeaderInput"></page-header>
+<div class="subHeader">
+  <h2 *ngIf="!meetingId"><mat-icon class="cursor-pointer" [routerLink]="['/customers/meetings']">chevron_left</mat-icon> New Meetings</h2>
+  <h2 *ngIf="meetingId"><mat-icon class="cursor-pointer" [routerLink]="['/customers/meetings']">chevron_left</mat-icon> Edit Meeting</h2>
+</div>
+<mat-card *ngIf="isDataReady && !view">
+  <form [formGroup]="customerMeeting" #addMeetingForm="ngForm" (submit)="_addMeeting(customerMeeting)">
+    <div>
+      <div fxLayout="row wrap" fxLayoutAlign="start center" fxLayoutGap="10px">
+        <div style="position: relative;" fxFlex="50">
+          <div class="disable-whole-div__cover" [hidden]="!completeStatus"></div>
+
+          <div fxLayout="column">
+            <div flex *ngIf="meetingId">
+              <mat-input-container>
+                <input matInput placeholder="Sales Person" value="{{userName}}" readonly>
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-input-container>
+                <input matInput name="description"
+                       formControlName="description"
+                       placeholder="Description"
+                       [attr.readonly]="completeStatus ? 'readonly' : null"
+
+                       (blur)="onBlurMethod($event.target.name, $event.target.value)">
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-input-container (click)="showView('selectCustomer')">
+                <input matInput formControlName="customerName" placeholder="Customer" required readonly>
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-input-container (click)="showView('selectBranch')">
+                <input matInput formControlName="branch" placeholder="Branch" readonly>
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-input-container>
+                <input matInput
+                       #dateFromDp="dpDayPicker"
+                       name="dateTime"
+                       formControlName="dateTime"
+                       (close)="closed()"
+                       [dpDayPicker]="dateTimeConfig"
+                       theme="dp-material"
+                       mode="daytime"
+                       attachTo=".mat-input-wrapper"
+                       placeholder="Start Date/Time"
+                       (blur)="onBlurMethod($event.target.name, $event.target.value)"
+                       requirec>
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-input-container class="endDateTime">
+                <input matInput
+                       #dateToDp="dpDayPicker"
+                       name="endDateTime"
+                       formControlName="endDateTime"
+                       [dpDayPicker]="endDateTimeConfig"
+                       theme="dp-material"
+                       mode="daytime"
+                       attachTo=".mat-input-wrapper"
+                       placeholder="End Date/Time"
+                       (blur)="onBlurMethod($event.target.name, $event.target.value)"
+                       required>
+              </mat-input-container>
+            </div>
+            <div flex>
+              <mat-form-field style="width: 200px;">
+                <mat-select formControlName="status" placeholder="Status" attr.disabled="{{completeStatus}}">
+                  <mat-option *ngFor="let status of statuses" [value]="status.value"
+                    (click)="onBlurMethod('status', status.value)">
+                    {{ status.viewValue }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+        </div>
+        <div fxFlex *ngIf="documentId" class="quotesMeetings">
+          <system-lookup [lookupName]="'quotesMeetings'" [documentId]="documentId" [isModal]="'true'" (onSelected)="onSelect($event)" [(data)]="data"></system-lookup>
+        </div>
+      </div>
+      <h2>Notes</h2>
+      <mat-tab-group>
+        <mat-tab [label]="labelTabs.sales">
+          <div *ngFor="let notes of previousNotes.sales" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea" class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="salesNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="salesNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.pricing">
+          <div *ngFor="let notes of previousNotes.pricing" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="pricingNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="pricingNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.customerService">
+          <div *ngFor="let notes of previousNotes.customerService" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="customerServiceNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="customerServiceNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.coolAir">
+          <div *ngFor="let notes of previousNotes.coolAir" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="coolAirNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="coolAirNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.marketing">
+          <div *ngFor="let notes of previousNotes.marketing" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="marketingNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="marketingNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.turbo">
+          <div *ngFor="let notes of previousNotes.turbo" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="turboNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="turboNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.ditek">
+          <div *ngFor="let notes of previousNotes.ditek" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="ditekNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="ditekNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.hungRite">
+          <div *ngFor="let notes of previousNotes.hungRite" class="previousNotes">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="hungRiteNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="hungRiteNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+        <mat-tab [label]="labelTabs.ductTies">
+          <div *ngFor="let notes of previousNotes.ductTies" class="ductTies">
+            {{notes.note}}
+            <mat-card-subtitle>
+              {{notes.userInfo}}, {{notes.meetingDate}}
+              </mat-card-subtitle>
+          </div>
+          <mat-input-container class="textarea">
+            <textarea matInput resizeToFitContent rows="10" name="ductTiesNotes" [attr.readonly]="completeStatus ? 'readonly' : null" formControlName="ductTiesNotes" (blur)="onBlurMethod($event.target.name, $event.target.value)"></textarea>
+          </mat-input-container>
+        </mat-tab>
+      </mat-tab-group>
+      <button mat-raised-button color="primary" type="submit" *ngIf="!meetingId && !showCompleteButton" [disabled]="!addMeetingForm.form.valid">Add Meeting</button>
+      <button mat-raised-button color="warn" type="button" *ngIf="meetingId && !completeStatus" (click)="openDialog()">Delete Meeting</button>
+      <button mat-raised-button color="primary" type="button" *ngIf="showCompleteButton" [disabled]="!addMeetingForm.form.valid" (click)="_completeMeeting(customerMeeting)">Complete Meeting</button>
+    </div>
+  </form>
+</mat-card>
+
+<mat-card *ngIf="view === 'selectCustomer'">
+  <button mat-icon-button style='float: right;' (click)="showView('')">
+    <mat-icon class="mat-24">close</mat-icon>
+  </button>
+
+  <system-lookup [isModal]="true" lookupName="customers" (onSelected)="addCustomer($event)"></system-lookup>
+</mat-card>
+
+<mat-card *ngIf="view === 'selectBranch' && customerId">
+  <button mat-icon-button style='float: right;' (click)="showView('')">
+    <mat-icon class="mat-24">close</mat-icon>
+  </button>
+
+  <system-lookup [isModal]="true" lookupName="customerMeetingsBranches" [documentId]="documentId" (onSelected)="addBranch($event)"></system-lookup>
+</mat-card>
+<mat-card *ngIf="view === 'selectBranch' && !customerId">
+  <button mat-icon-button style='float: right;' (click)="showView('')">
+    <mat-icon class="mat-24">close</mat-icon>
+  </button>
+
+  <system-lookup [isModal]="true" lookupName="customerMeetingsBranchesAll" [documentId]="documentId" (onSelected)="addBranch($event)"></system-lookup>
+</mat-card>
+
+<mat-card *ngIf="!isDataReady">
+  <mat-spinner class="app-spinner"></mat-spinner>
+</mat-card>

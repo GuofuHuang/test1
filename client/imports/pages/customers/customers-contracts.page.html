@@ -1,0 +1,308 @@
+<div [ngSwitch]="state.view" [hidden]="state.hidden" id="customers-contracts">
+  <div *ngSwitchDefault>
+    <page-header></page-header>
+    <div *ngIf="isTestWebsite">
+      <button mat-button color="primary" (click)="syncDatabase()">
+        sync database
+      </button>
+      <div *ngIf="isSyncing">
+        <mat-progress-bar mode="buffer" color="primary" [value]="progressPercentage"></mat-progress-bar>
+        {{syncText}}
+      </div>
+    </div>
+    <div *ngIf="isDeveloper">
+      contract Id: {{state.contractId}}
+    </div>
+
+    <div fxLayout="row" fxLayout.xs="column" fxLayoutAlign="space-between center" fxLayoutAlign.xs="space-between stretch"
+         class="ph-24 selectorForm">
+      <div fxFlex="100" fxFlex.xs="100" class="select-containter" (click)="showView('selectcustomer')">
+        <label>CUSTOMER</label>
+        <mat-input-container class="full-width">
+          <input matInput placeholder="Select Customer" readonly aria-readonly [(ngModel)]="customerLabel">
+        </mat-input-container>
+      </div>
+      <div fxFlex="4" fxFlex.xs="none">
+      </div>
+      <div fxFlex="100" fxFlex.xs="100" class="select-containter" (click)="showView('selectcategory')">
+        <label>PRODUCT LINE</label>
+        <mat-input-container class="full-width">
+          <input matInput placeholder="Select Product Line" readonly aria-readonly [(ngModel)]="categoryLabel">
+        </mat-input-container>
+      </div>
+    </div>
+    <br>
+    <div *ngIf="pdfLoading">
+      GENERATING PDF <mat-spinner style="height: 36px; width: 36px;"></mat-spinner>
+    </div>
+
+
+    <div class="ph-24">
+      <mat-chip-list>
+        <mat-chip *ngFor="let category of state.categories"
+                 selected="true"
+                 fxLayout="row wrap" class="filter-tag">
+          <div fxFlex="" class="filter-name cursor-pointer" (click)="navigateCategory(category)">
+            <span>{{category.name}}</span>
+          </div>
+          <div class="float-right filter-icon cursor-pointer" fxFlex="">
+            <div fxFlex="auto" class="filter-remove" (click)="removeCategory(category)">
+              <mat-icon>clear</mat-icon>
+            </div>
+          </div>
+        </mat-chip>
+      </mat-chip-list>
+    </div>
+    <div *ngIf="state.categoryId && state.customerId">
+      <div fxLayout="row" fxLayout.xs="column" *ngIf='viewAll && state.category' fxLayoutAlign="space-between center" class="ph-24">
+        <div fxFlex="50" fxLayout="row">
+          <div fxFlex>
+            <mat-input-container>
+              <input matInput placeholder="Level 1 %" />
+            </mat-input-container>
+          </div>
+          <div fxFlex>
+              <input matInput placeholder="Level 2 %" />
+          </div>
+          <div fxFlex>
+              <input matInput placeholder="Level 3 %" />
+          </div>
+          <div fxFlex>
+              <input matInput placeholder="Level 4 %" />
+          </div>
+          <div fxFlex>5. Five</div>
+        </div>
+
+        <!--<div fxFlex="50">-->
+          <!--<div fxLayout="row" fxLayoutAlign="space-between center">-->
+            <!--<div fxFlex>-->
+              <!--<mat-form-field fxFlex="70">-->
+                <!--<input readonly matInput placeholder="Level 1 %" type="number" [(ngModel)]="state.category.priceLevel1Percent">-->
+              <!--</mat-form-field>-->
+            <!--</div>-->
+            <!--<div fxFlex>-->
+              <!--<mat-form-field fxFlex="70">-->
+                <!--<input readonly matInput placeholder="Level 2 %" type="number" [(ngModel)]="state.category.priceLevel2Percent">-->
+              <!--</mat-form-field>-->
+            <!--</div>-->
+            <!--<div fxFlex>-->
+              <!--<mat-form-field fxFlex="70">-->
+                <!--<input readonly matInput placeholder="Level 3 %" type="number" [(ngModel)]="state.category.priceLevel3Percent">-->
+              <!--</mat-form-field>-->
+            <!--</div>-->
+            <!--<div fxFlex>-->
+              <!--<mat-form-field fxFlex="70">-->
+                <!--<input readonly matInput placeholder="Level 4 %" type="number" [(ngModel)]="state.category.priceLevel4Percent">-->
+              <!--</mat-form-field>-->
+            <!--</div>-->
+            <!--<div fxFlex>-->
+              <!--<mat-form-field fxFlex="70">-->
+                <!--<input matInput placeholder="Level 5 %" min="0" type="number"-->
+                       <!--[(ngModel)]="state.contractCategory.priceLevel5Percent" (change)="onLevel5Change($event)">-->
+              <!--</mat-form-field>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<div fxFlex="50" fxFlex.xs="100" fxLayout="row" class="full-width">-->
+          <!--<mat-input-container fxFlex.xs="20" class="mr-20">-->
+            <!--<input readonly matInput placeholder="Level 1 %" type="number" [(ngModel)]="state.category.priceLevel1Percent">-->
+          <!--</mat-input-container>-->
+          <!--<mat-input-container fxFlex.xs="20" class="mr-20">-->
+            <!--<input readonly matInput placeholder="Level 2 %" type="number" [(ngModel)]="state.category.priceLevel2Percent">-->
+          <!--</mat-input-container>-->
+          <!--<mat-input-container fxFlex.xs="20" class="mr-20">-->
+            <!--<input readonly matInput placeholder="Level 3 %" type="number" [(ngModel)]="state.category.priceLevel3Percent">-->
+          <!--</mat-input-container>-->
+          <!--<mat-input-container fxFlex.xs="20" class="mr-20">-->
+            <!--<input readonly matInput placeholder="Level 4 %" type="number" [(ngModel)]="state.category.priceLevel4Percent">-->
+          <!--</mat-input-container>-->
+          <!--<mat-input-container fxFlex.xs="20" class="mr-20">-->
+            <!--<input matInput placeholder="Level 5 %" min="0" type="number"-->
+                   <!--[(ngModel)]="state.contractCategory.priceLevel5Percent" (change)="onLevel5Change($event)">-->
+          <!--</mat-input-container>-->
+        <!--</div>-->
+        <div fxFlex="50" fxFlex.xs="100" class="full-width">
+          <div class="pb-10">
+            <mat-form-field style="width: 200px">
+              <mat-select placeholder="Year To Date:" name="year" [(ngModel)]="state.selectedYear"
+                          (change)="setYear($event.value)">
+                <mat-option *ngFor="let year of years" [value]="year">
+                  {{year}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <normal-table [rows]="normalTableData.rows" [columns]="normalTableData.columns"></normal-table>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="state.selectedYear">
+        <div fxLayout="row" *ngIf='productInContract' fxLayoutAlign="space-between center" class="ph-24">
+          <filterBox-component fxFlex='100' (filter)="getFilterConditions($event)"
+                               [lookupName]="'contractPricing'"></filterBox-component>
+        </div>
+        <section [hidden]='!productInContract' id="customerContracts">
+          <system-lookup #contractPricing [lookupName]="'contractPricing'" [config]="config" [(data)]="data"
+                         (_onMobileClick)="onMobileClick($event)" (isLoading)="setLoading($event)"></system-lookup>
+        </section>
+        <h3 class="ph-24" *ngIf='!productInContract'>This category is not in contract</h3>
+      </div>
+    </div>
+  </div>
+  <div *ngSwitchCase="'copy'">
+    <button mat-icon-button style="float: right;"(click)="showView('')">
+      <mat-icon style="color: white" class="mat-24">close</mat-icon>
+    </button>
+    <customers-contracts-copy [state]="state.copyContract" (onClick)="showView($event)"></customers-contracts-copy>
+  </div>
+  <div *ngSwitchCase="'update'">
+    <button mat-icon-button style="float: right;" (click)="showView('')">
+      <mat-icon style="color: white" class="mat-24">close</mat-icon>
+    </button>
+    <customers-contracts-update [props]="state.updateContract" (onClick)="showView($event)"></customers-contracts-update>
+  </div>
+  <mat-card *ngSwitchCase="'selectcustomer'">
+    <button mat-icon-button style='float: right;' (click)="showView('')">
+      <mat-icon class="mat-24">close</mat-icon>
+    </button>
+    <!--<filterBox-component lookupName="customers" (modalData)="getModalData(data)"></filterBox-component>-->
+    <system-lookup [isModal]="true" lookupName="customers" (onSelected)="getCustomer($event)"></system-lookup>
+  </mat-card>
+  <mat-card *ngSwitchCase="'selectcategory'">
+    <button mat-icon-button style='float: right;' (click)="showView('')">
+      <mat-icon class="mat-24">close</mat-icon>
+    </button>
+
+    <system-lookup [isModal]="true" lookupName="selectCategoryOnContract" (onSelected)="setCategory($event)"></system-lookup>
+  </mat-card>
+  <mat-card *ngSwitchCase="'selectfromcustomer'">
+    <button mat-icon-button style='float: right;' (click)="showView('copy')">
+      <mat-icon class="mat-24">close</mat-icon>
+    </button>
+    <system-lookup [isModal]="true" lookupName="customers" (onSelected)="onSelectFromCustomer($event)"></system-lookup>
+  </mat-card>
+  <mat-card *ngSwitchCase="'selecttocustomer'">
+    <button mat-icon-button style='float: right;' (click)="showView('copy')">
+      <mat-icon class="mat-24">close</mat-icon>
+    </button>
+    <system-lookup [isModal]="true" lookupName="customers" (onSelected)="addToCustomer($event)"></system-lookup>
+  </mat-card>
+  <mat-card *ngSwitchCase="'selectUpdatedCustomer'">
+    <button mat-icon-button style='float: right;' (click)="showView('update')">
+      <mat-icon class="mat-24">close</mat-icon>
+    </button>
+    <system-lookup [isModal]="true" lookupName="customers" (onSelected)="addUpdatedCustomers($event)"></system-lookup>
+  </mat-card>
+  <mat-card *ngSwitchCase="'singledocument'">
+    <form [formGroup]="contractForm" novalidate>
+      <mat-checkbox formControlName="isOnContract">On Contract</mat-checkbox>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="description" formControlName="description" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="product" formControlName="product" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="YTDsales" formControlName="YTDsales" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="STDcost" formControlName="STDcost" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="vendorCost" formControlName="vendorCost" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="STDprice" formControlName="STDprice" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="previousPrice" formControlName="previousPrice" readonly aria-readonly=""/>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input type="text" [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'contractPrice',
+        'greenBackground': state.newPriceTag == 'contractPrice'
+}" style="padding: 5px" matInput
+               (change)="setContractPrice('contractPrice')"
+               placeholder="contractPrice" formControlName="contractPrice"/>
+      </mat-form-field>
+
+      <table>
+        <tr>
+          <td>Level1</td>
+          <td>
+            <button [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'level1',
+                'greenBackground': state.newPriceTag == 'level1'
+
+}" type="button" (click)="setContractPrice('level1')" mat-raised-button>{{contractForm.controls.level1.value}}</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Level2</td>
+          <td>
+            <button [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'level2',
+                'greenBackground': state.newPriceTag == 'level2'
+
+        }" (click)="setContractPrice('level2')" type="button" mat-raised-button>{{contractForm.controls.level2.value}}</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Level3</td>
+          <td>
+            <button [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'level3',
+                'greenBackground': state.newPriceTag == 'level3'
+
+        }" (click)="setContractPrice('level3')" type="button" mat-raised-button>{{contractForm.controls.level3.value}}</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Level4</td>
+          <td>
+            <button [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'level4',
+                'greenBackground': state.newPriceTag == 'level4'
+
+        }" (click)="setContractPrice('level4')" type="button" mat-raised-button>{{contractForm.controls.level4.value}}</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Level5</td>
+          <td>
+            <button [ngClass]="{
+        'blueBackground': state.currentPriceTag == 'level5',
+                'greenBackground': state.newPriceTag == 'level5'
+
+        }" (click)="setContractPrice('level5')" type="button" mat-raised-button>{{contractForm.controls.level5.value}}</button>
+          </td>
+        </tr>
+      </table>
+
+      <button mat-raised-button color="primary" type="submit" (click)="updateContractPrice()">Submit</button>
+      <button mat-raised-button color="primary" type="button" (click)="toggleContractDocument()">Back</button>
+
+    </form>
+  </mat-card>
+</div>
+
+
+<div *ngIf="isDataTableLoading" style="position:fixed; top: 100px; z-index: 2000; width: 100%; height: 100%;">
+  <div id="blackout" style="display:block;">
+  </div>
+  <mat-card style="z-index: 20; width: 100%">
+    <mat-card-content>
+      <h2 class="example-h2">Loading...</h2>
+      <section class="example-section">
+        <mat-progress-bar
+            class="example-margin"
+            [color]="'primary'"
+            [mode]="'query'"
+            [value]="value"
+            [bufferValue]="bufferValue">
+        </mat-progress-bar>
+      </section>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<simple-notifications [options]="options"></simple-notifications>

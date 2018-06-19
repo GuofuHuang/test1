@@ -1,0 +1,198 @@
+<mat-card *ngIf="filterDetail" fxLayout="row">
+  <div fxFlex="">
+    <div fxLayout="row wrap">
+      <div fxFlex>
+        <mat-input-container>
+          <input matInput placeholder="Filter Name" [(ngModel)]="filterDetail.name">
+        </mat-input-container>
+      </div>
+      <div fxFlex="none" class="cursor-pointer" (click)="hideFilterDetail()">
+        <div>
+          <mat-icon>clear</mat-icon>
+        </div>
+      </div>
+    </div>
+    <div *ngFor="let condition of filterDetail.conditions; let conditionIndex = index" fxLayout="column" style="border-bottom: 1px solid black">
+      <div fxLayout="row">
+        <div fxFlex="none" color="black" fxLayoutAlign="center center" class="cursor-pointer" (click)="removeCondition(condition, conditionIndex)">
+          <mat-icon>clear</mat-icon>
+        </div>
+        <div fxFlex="10px"></div>
+        <div fxFlex="none">
+          <mat-form-field>
+            <mat-select placeholder="Select Column" [(ngModel)]="condition.column" name="column" (change)="onColumnChange($event, conditionIndex)">
+              <mat-option *ngFor="let column of columns" [value]="column.prop">
+                {{ column.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div fxFlex="10px"></div>
+        <div fxFlex="30">
+          <mat-form-field>
+            <mat-select placeholder="Select Method" [(ngModel)]="condition.method" name="methods" (change)="onMethodChange($event, conditionIndex)">
+              <mat-option *ngFor="let method of condition.methods" [value]="method.prop">
+                {{ method.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div fxFlex="none" *ngIf="condition.method === '$or'">
+          <div *ngIf="condition.type === 'string'">
+            <mat-input-container>
+              <input matInput placeholder="Type Criteria" #criteria (keyup.enter)="addValueToCondition(condition, conditionIndex, criteria.value)">
+            </mat-input-container>
+          </div>
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput placeholder="Type Criteria">
+            </mat-input-container>
+          </div>
+        </div>
+        <div fxFlex="none" *ngIf="condition.method === '$regex' || condition.method == '$not'">
+          <div *ngIf="condition.type === 'string'">
+            <mat-input-container>
+              <input matInput [(ngModel)]="condition.value" placeholder="Type Criteria">
+            </mat-input-container>
+          </div>
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput placeholder="Type Criteria">
+            </mat-input-container>
+          </div>
+        </div>
+        <div fxFlex="none" *ngIf="condition.method === '$eq' || condition.method === '$ne'">
+          <div *ngIf="condition.type === 'string'">
+            <mat-input-container>
+              <input matInput [(ngModel)]="condition.value">
+            </mat-input-container>
+          </div>
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput [matDatepicker]="startPicker" [(ngModel)]="condition.value"  placeholder="Pick a date">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            </mat-input-container>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </div>
+        </div>
+
+        <div fxFlex="none" *ngIf="condition.method === '<>'">
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput [matDatepicker]="startPicker" [(ngModel)]="condition.value[0]"  placeholder="Start from">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            </mat-input-container>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-input-container>
+              <input matInput [matDatepicker]="endPicker" [(ngModel)]="condition.value[1]" placeholder="End to">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            </mat-input-container>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </div>
+        </div>
+        <div fxFlex="none" *ngIf="condition.method === '$gte'">
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput [matDatepicker]="startPicker" [(ngModel)]="condition.value[0]"  placeholder="Start from">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            </mat-input-container>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </div>
+        </div>
+        <div fxFlex="none" *ngIf="condition.method === '$lt'">
+          <div *ngIf="condition.type === 'date'">
+            <mat-input-container>
+              <input matInput [matDatepicker]="endPicker" [(ngModel)]="condition.value[0]"  placeholder="Earlier than">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            </mat-input-container>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </div>
+        </div>
+
+
+
+
+        <!--<div fxFlex="none" *ngIf="condition.type === 'string'">-->
+          <!--<div *ngIf="condition.method === '$eq'">-->
+            <!--<mat-input-container>-->
+              <!--<input matInput [(ngModel)]="condition.value">-->
+            <!--</mat-input-container>-->
+          <!--</div>-->
+          <!--<div *ngIf="condition.method === '$ne'">-->
+            <!--<mat-input-container>-->
+              <!--<input matInput [(ngModel)]="condition.value">-->
+            <!--</mat-input-container>-->
+          <!--</div>-->
+          <!--<div *ngIf="condition.method === '$regex'">-->
+            <!--<mat-input-container>-->
+              <!--<input matInput [(ngModel)]="condition.value">-->
+            <!--</mat-input-container>-->
+          <!--</div>-->
+        <!--</div>-->
+
+        <!--<div fxFlex="none" *ngIf="condition.type === 'boolean'">-->
+          <!--<div *ngIf="condition.method === '$or'">-->
+            <!--<mat-input-container>-->
+              <!--<input matInput placeholder="Type Criteria" [(ngModel)]="condition.value">-->
+            <!--</mat-input-container>-->
+          <!--</div>-->
+          <!--<div *ngIf="condition.method === '$eq'">-->
+            <!--<mat-input-container>-->
+              <!--<input matInput placeholder="Type Criteria"[(ngModel)]="condition.value">-->
+            <!--</mat-input-container>-->
+          <!--</div>-->
+        <!--</div>-->
+
+      </div>
+      <div fxLayout="row">
+        <div *ngIf="condition.type === 'string' && condition.method === '$or'">
+          <mat-chip-list>
+            <mat-chip *ngFor="let tag of condition.value; let tagIndex of index"
+                     selected="true"
+                     fxLayout="row wrap">
+              <div fxFlex="" class="filter-name cursor-pointer">
+                <span>{{tag}}</span>
+              </div>
+              <div class="float-right filter-icon cursor-pointer" fxFlex="">
+                <div fxFlex="none" class="filter-remove" (click)="removeTag(condition, conditionIndex, tagIndex)">
+                  <mat-icon>clear</mat-icon>
+                </div>
+              </div>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+      <br>
+    </div>
+    <br>
+    <div fxLayout="row">
+      <div fxFlex="none" fxLayout="row" class="cursor-pointer" (click)="addCondition()">
+        <div fxFlex="none" fxLayoutAlign="space-around center">
+          <mat-icon>add</mat-icon>
+        </div>
+        <div fxFlex="none">
+          <h3>Add Another Condition</h3>
+        </div>
+      </div>
+    </div>
+    <div fxLayout="row">
+      <div fxFlex="none" class="mr-10">
+        <button (click)="saveFilter()" mat-raised-button color="primary">SAVE</button>
+      </div>
+      <div fxFlex="none" class="mr-10">
+        <button mat-raised-button (click)="applyFilter()" color="accent">APPLY</button>
+      </div>
+      <div fxFlex="none">
+        <button mat-raised-button (click)="deleteFilter()" color="warn">DELETE</button>
+      </div>
+    </div>
+
+    <!--<div fxLayoutAlign="space-around center" fxLayout="row">-->
+    <!--<div (click)="addCondition()">-->
+    <!--<button mat-fab color="accent"  matTooltip="Add another condition"><mat-icon>add</mat-icon></button>-->
+    <!--</div>-->
+    <!--</div>-->
+  </div>
+
+</mat-card>
