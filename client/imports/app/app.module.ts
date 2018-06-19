@@ -11,6 +11,13 @@ import { TodoAddComponent } from './todo-add/todo-add.component';
 import { TodoListComponent } from './todo-list/todo-list.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
+declare var module : any;
+global['System'] = {
+  import(path: string){
+    return module.dynamicImport(path);
+  }
+}
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -22,7 +29,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
       },
       {
         path: 'todoAdd',
-        component: TodoAddComponent
+        loadChildren: "todo-add/todo-add.module#TodoAddModule",
       },
       // Home Page
       {
@@ -39,7 +46,6 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
   ],
   declarations: [
     AppComponent,
-    TodoAddComponent,
     TodoListComponent,
     PageNotFoundComponent
   ],

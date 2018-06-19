@@ -1,2 +1,16 @@
 node_modules/
-.DS_Store
+.meteor/local
+npm-debug.log
+.idea
+**/.DS_Store
+settings.json
+settings_production.json
+settings_dev.json
+settings_yibas.json
+test.json
+settings_test.json
+both/client/
+client/imports/observables/
+client/imports/pages/developer/guofu-testing/services/
+imports/client/
+test/
