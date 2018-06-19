@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { routing } from './developer.routing';
+import {DeveloperRoutingModule} from './developer.routing';
 import {SharedModule} from "../../modules/shared-module";
 import {CommonModule} from "@angular/common";
 import {MaterialImportModule} from "../../app/material-import.module";
@@ -11,14 +11,13 @@ import {DpDatePickerModule} from 'ng2-date-picker';
 
 @NgModule({
   imports: [
-    routing,
     SharedModule,
     CommonModule,
     FormsModule,
     MaterialImportModule,
-    RouterModule,
     ReactiveFormsModule,
     DpDatePickerModule,
+    DeveloperRoutingModule
   ],
   declarations: [DEVELOPER_DECLARATIONS]
 })

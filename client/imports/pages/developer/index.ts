@@ -34,7 +34,6 @@ export default {
   DeveloperCreateParentTenantPage,
   GuofuTestingPage,
   JoeTestingPage,
-  DeveloperUrltoolPage,
   DeveloperSynctoolPage
 }
 

@@ -6,7 +6,6 @@ import ExecutiveComponents from "../executive";
 import AdminComponents from "../admin";
 import CustomerComponents from "../customers";
 import InventoryComponents from "../inventory";
-import DeveloperComponents from "../developer";
 import * as funcs from '../../../../both/functions/common';
 
 @Component({
@@ -31,23 +30,14 @@ import * as funcs from '../../../../both/functions/common';
           pageHeader required
         </small>
         
-        <!--<mat-checkbox formControlName="showInSidenav">Show in the sidenav?</mat-checkbox>-->
 
         <div>
-          <!--<mat-checkbox formControlName="linkPermission">Link to a permission?</mat-checkbox>-->
           <mat-select  placeholder="Permission" formControlName="selectedPermission" (change)="onPermissionChange($event)">
             <mat-option *ngFor="let permission of permissions" [value]="permission">
               {{permission.name}}
             </mat-option>
           </mat-select>
         </div>
-        <!--<div>-->
-          <!--<mat-select placeholder="Module" formControlName="selectedModule">-->
-            <!--<mat-option *ngFor="let moduleName of moduleNames" [value]="moduleName" >-->
-              <!--{{moduleName}}-->
-            <!--</mat-option>-->
-          <!--</mat-select>-->
-        <!--</div>-->
         <div>
           <mat-select placeholder="Component" formControlName="selectedComponent">
             <mat-option *ngFor="let component of components" [value]="component.name">
@@ -63,46 +53,17 @@ import * as funcs from '../../../../both/functions/common';
 
 export class DeveloperUrltoolPage implements OnInit{
   data: any={};
-
   name: string = '';
   email: any = {};
   start: boolean = false;
   status: string = '';
   alert: any = {};
   components:any = [];
-  moduleNames = ['Customers', 'Administrator', 'Inventory', 'Executive'];
   permissions:any = [];
-  permissionModule:any;
   modules = [];
   newUrl:any;
 
   public form: FormGroup;
-  states: [
-    {
-      name: 'Arkansas',
-      population: '2.978M',
-      // https://commons.wikimedia.org/wiki/File:Flag_of_Arkansas.svg
-      flag: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Flag_of_Arkansas.svg'
-    },
-    {
-      name: 'California',
-      population: '39.14M',
-      // https://commons.wikimedia.org/wiki/File:Flag_of_California.svg
-      flag: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Flag_of_California.svg'
-    },
-    {
-      name: 'Florida',
-      population: '20.27M',
-      // https://commons.wikimedia.org/wiki/File:Flag_of_Florida.svg
-      flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Florida.svg'
-    },
-    {
-      name: 'Texas',
-      population: '27.47M',
-      // https://commons.wikimedia.org/wiki/File:Flag_of_Texas.svg
-      flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Texas.svg'
-    }
-  ];
 
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute,
@@ -131,18 +92,7 @@ export class DeveloperUrltoolPage implements OnInit{
         name: 'Executive',
         components: ExecutiveComponents,
         path: '/pages/executive'
-      },
-      {
-        name: 'Development',
-        components: DeveloperComponents,
-        path: '/pages/developer'
-      },
-      {
-        name: 'Designer',
-        components: DeveloperComponents,
-        path: '/pages/designer'
       }
-
     ];
 
     this.form = this._fb.group({

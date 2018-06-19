@@ -1,4 +1,5 @@
 import './imports/polyfills';
+import 'hammerjs';
 import { Meteor } from 'meteor/meteor';
 
 import { enableProdMode } from '@angular/core';

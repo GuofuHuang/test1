@@ -104,8 +104,6 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-
-    console.log('dashboard runs');
     let systemConfig:any = await funcs.callbackToPromise(MeteorObservable.call('findOne', 'systemOptions', {name: 'systemConfig'}));
 
     if(systemConfig) {

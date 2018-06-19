@@ -182,7 +182,6 @@ export class CustomersMeetingsPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log('customers meetings');
     this.init();
   }
 

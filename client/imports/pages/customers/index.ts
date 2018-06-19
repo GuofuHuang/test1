@@ -43,3 +43,28 @@ export const CUSTOMERS_DECLARATIONS = [
   DeleteDialog,
   DialogSelect
 ];
+
+export default {
+  TodoAddComponent,
+  CustomersComponent,
+  CustomersMeetingsPage,
+  CustomersDashboardPage,
+  CustomersInquiryPage,
+  // CustomersMeetingsMapPage,
+  CustomersMeetingsCreateComponent,
+  GroupByPipe,
+  CustomersQuotesPage,
+  CustomersCreateQuotePage,
+  CustomersQuoteReviewPage,
+  CustomersContractsPage,
+  // CustomersContractPage,
+  CustomersOrdersPage,
+  CustomersOrderReviewPage,
+  CustomersInvoicesPage,
+  CustomersInvoiceReviewPage,
+  CustomersContractsCopyPage,
+  CustomersContractsUpdatePage,
+  DeleteDialog,
+  DialogSelect
+
+}
