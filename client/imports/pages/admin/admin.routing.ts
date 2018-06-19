@@ -1,19 +1,26 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import AdminPages from './index';
+import {AdminLogsPage} from "./AdminLogsPage";
+import {AdminUsersPage} from "./admin-users.page";
+import {AdminPermissionsPage} from "./admin-permissions.page";
+import {AdminPermissionPage} from "./admin-permission.page";
+import {AdminGroupsPage} from "./admin-groups.page";
+import {AdminGroupPage} from "./admin-group.page";
+import {AdminTenantsPage} from "./admin-tenants.page";
+import {AdminTenantPage} from "./admin-tenant.page";
 
 const routes: Routes = [
   { path: '', redirectTo: 'logs' },
-  { path: 'logs', component: AdminPages['AdminLogsPage'] },
-  { path: 'users', component: AdminPages['AdminUsersPage'] },
-  { path: 'users/:documentId', component: AdminPages['AdminUserPage'] },
-  { path: 'permissions', component: AdminPages['AdminPermissionsPage'] },
-  { path: 'permissions/:documentId', component: AdminPages['AdminPermissionPage'] },
-  { path: 'groups', component: AdminPages['AdminGroupsPage'] },
-  { path: 'groups/:documentId', component: AdminPages['AdminGroupPage'] },
-  { path: 'tenants', component: AdminPages['AdminTenantsPage'] },
-  { path: 'tenants/:documentId', component: AdminPages['AdminTenantPage'] },
+  { path: 'logs', component: AdminLogsPage },
+  { path: 'users', component: AdminUsersPage },
+  { path: 'users/:documentId', component: AdminUsersPage },
+  { path: 'permissions', component: AdminPermissionsPage },
+  { path: 'permissions/:documentId', component: AdminPermissionPage },
+  { path: 'groups', component: AdminGroupsPage },
+  { path: 'groups/:documentId', component: AdminGroupPage },
+  { path: 'tenants', component: AdminTenantsPage },
+  { path: 'tenants/:documentId', component: AdminTenantPage },
 ];
 
 export const routing: ModuleWithProviders = RouterModule.forChild(routes);

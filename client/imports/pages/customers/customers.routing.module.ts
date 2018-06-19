@@ -16,9 +16,6 @@ import {CustomersInvoiceReviewPage} from "./customers-invoiceReview.page";
 @NgModule({
   imports: [
     RouterModule.forChild([
-      {
-        path: '', component: CustomersMeetingsPage,
-      },
       { path: 'contracts', component: CustomersContractsPage },
       { path: 'contracts/copy', component: CustomersContractsCopyPage },
       { path: 'quotes', component: CustomersQuotesPage },

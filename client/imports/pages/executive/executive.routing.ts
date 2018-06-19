@@ -9,7 +9,7 @@ import {ExecutiveEntryComponent} from "./executive-entry.component";
 const baseRoute = "executive/";
 
 const routes: Routes = [
-  {path: '**', component: ExecutivePages['ExecutiveEntryComponent']},
+  {path: '**', component: ExecutiveEntryComponent},
 
   // {path: 'dashboard', component: ExecutiveDashboardPage['ExecutiveDashboardPage'], canActivate: ['canActivateTeam']},
 ];
